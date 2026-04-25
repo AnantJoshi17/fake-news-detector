@@ -80,7 +80,7 @@ fake-news-detector/
 
 ---
 
-## How it works:
+## How it works
 
 1. **Preprocessing** — lowercase, remove URLs and punctuation, lemmatize, remove stop-words
 2. **Feature extraction** — TF-IDF with 50,000 features, unigrams + bigrams
