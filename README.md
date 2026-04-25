@@ -1,4 +1,4 @@
-# 🔍 Fake News Detector
+# 🔍 Fake News Detector:
 
 A machine learning web app that classifies news articles as real or fake using NLP and Logistic Regression.
 
