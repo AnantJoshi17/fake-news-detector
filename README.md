@@ -61,7 +61,7 @@ Opens at http://localhost:8501
 
 ---
 
-## Project structure
+## Project structure:
 
 ```
 fake-news-detector/
