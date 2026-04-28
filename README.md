@@ -38,7 +38,7 @@ source venv/bin/activate       # Mac/Linux
 pip install -r requirements.txt
 ```
 
-### 4. Add datasets
+### 4. Add datasets.
 Download `Fake.csv` and `true.csv` from [Kaggle](https://www.kaggle.com/datasets/clmentbisaillon/fake-and-real-news-dataset) and place them in a `data/` folder:
 ```
 fake-news-detector/
