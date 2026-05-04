@@ -2,7 +2,7 @@
 
 A machine learning web app that classifies news articles as real or fake using NLP and Logistic Regression.
 
-**Model accuracy: 99.2%** — trained on ~45,000 articles
+**Model accuracy: 99.2%** — trained on ~45,000 articles.
 
 ---
 
