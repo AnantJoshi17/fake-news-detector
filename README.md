@@ -7,7 +7,7 @@ A machine learning web app that classifies news articles as real or fake using N
 ---
 
 ## Tech stack
-.
+
 | Layer | Tool |
 |---|---|
 | Language | Python 3.10+ |
