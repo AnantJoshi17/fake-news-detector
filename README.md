@@ -5,6 +5,7 @@ A machine learning web app that classifies news articles as real or fake using N
 **Model accuracy: 99.2%** — trained on ~45,000 article.
 
 ---
+/
 
 ## Tech stack
 
