@@ -122,7 +122,8 @@ Best performing model is automatically selected and saved.
 
 **Fake News Detection Result:**
 
-![Fake News Result](screenshots/app_fake.png)
+![Fake News Result](<img width="2624" height="1966" alt="image" src="https://github.com/user-attachments/assets/ea6150ca-0620-47bd-ad56-970dde5710b6" />
+)
 
 **Real News Detection Result:**
 
