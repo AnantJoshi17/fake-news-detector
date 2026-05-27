@@ -118,7 +118,6 @@ Best performing model is automatically selected and saved.
 
 ## 📸 Screenshots / Output
 
-> *(Add your screenshots here after running the app)*
 
 **Fake News Detection Result:**
 
