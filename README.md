@@ -2,6 +2,7 @@
 
 A machine learning web application that detects whether a news article is **Real or Fake** using Natural Language Processing (NLP) and multiple ML classification algorithms.
 
+📌 📌 📌 LIVE DEMO : https://fake-news-detector-truthlens.streamlit.app/ 
 ---
 
 ## 📌 Brief Description
@@ -114,7 +115,6 @@ fake-news-detection/
 
 Best performing model is automatically selected and saved.
 
----
 
 
 
@@ -124,9 +124,9 @@ Best performing model is automatically selected and saved.
 
 | Name | Roll Number |
 |---|---|
-| Anant Joshi | *(add roll no.)* |
-| *(ANSH GUPTA)* | *(EN23CS301149)* |
-| *(ANAY DESAI)* | *(EN23CS301128)* |
+| ANANT JOSHI| EN23CS301125|
+| ANSH DESAI | EN23CS301128 |
+| ANSH GUPTA | EN23CS301125 |
 
 **Institution:** Medi-Caps University, Indore
 **Batch:** 2023–2027
