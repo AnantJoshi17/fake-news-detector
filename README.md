@@ -126,7 +126,7 @@ Best performing model is automatically selected and saved.
 |---|---|
 | ANANT JOSHI| EN23CS301125|
 | ANSH DESAI | EN23CS301128 |
-| ANSH GUPTA | EN23CS301125 |
+| ANSH GUPTA | EN23CS301149 |
 
 **Institution:** Medi-Caps University, Indore
 **Batch:** 2023–2027
