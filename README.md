@@ -116,6 +116,7 @@ fake-news-detection/
 Best performing model is automatically selected and saved.
 
 
+<img width="1312" height="983" alt="Screenshot 2026-05-28 at 12 35 51 AM" src="https://github.com/user-attachments/assets/7a841e50-6aee-4c1b-8f6a-fd8bffa13876" />
 
 
 ---
