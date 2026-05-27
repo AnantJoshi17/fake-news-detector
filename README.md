@@ -116,17 +116,7 @@ Best performing model is automatically selected and saved.
 
 ---
 
-## 📸 Screenshots / Output
 
-
-**Fake News Detection Result:**
-
-![Fake News Result](<img width="2624" height="1966" alt="image" src="https://github.com/user-attachments/assets/ea6150ca-0620-47bd-ad56-970dde5710b6" />
-)
-
-**Real News Detection Result:**
-
-![Real News Result](screenshots/app_real.png)
 
 ---
 
@@ -135,12 +125,12 @@ Best performing model is automatically selected and saved.
 | Name | Roll Number |
 |---|---|
 | Anant Joshi | *(add roll no.)* |
-| *(Team Member 2)* | *(add roll no.)* |
-| *(Team Member 3)* | *(add roll no.)* |
+| *(ANSH GUPTA)* | *(EN23CS301149)* |
+| *(ANAY DESAI)* | *(EN23CS301128)* |
 
 **Institution:** Medi-Caps University, Indore
 **Batch:** 2023–2027
-**Subject:** *(add subject name)*
+**Subject:** *(MINI PROJECT)*
 
 ---
 
