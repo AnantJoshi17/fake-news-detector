@@ -1,6 +1,6 @@
 # 📰 Fake News Detection Using Machine Learning
 
-A machine learning web application that detects whether a news article is **Real or Fake** using Natural Language Processing (NLP) and multiple ML classification algorithms.
+A machine learning web application that detects whether a news article is **Real or Fake** using Natural Language Processing (NLP) and ML classification algorithms.
 
 📌 📌 📌 LIVE DEMO : https://fake-news-detector-truthlens.streamlit.app/ 
 ---
@@ -35,7 +35,7 @@ Fake news is a growing problem on the internet and social media. This project ai
   - Logistic Regression
   
 - Prints **accuracy, precision, recall, and F1-score** for all models
-- Automatically selects and **saves the best model** using joblib
+- Automatically selects and **saves the model** using pickle
 - **Streamlit web app** where user can paste any news article and get instant prediction
 - Shows **confidence percentage** for Real vs Fake
 
@@ -54,7 +54,7 @@ cd fake-news-detection
 
 ### Step 2 — Install required libraries
 ```bash
-pip install pandas numpy scikit-learn streamlit joblib
+pip install pandas numpy scikit-learn streamlit pickle
 ```
 
 ### Step 3 — Download the dataset
@@ -67,9 +67,9 @@ pip install pandas numpy scikit-learn streamlit joblib
 python model.py
 ```
 This will:
-- Train all 4 models
+- Trains model
 - Print accuracy results
-- Save `best_model.pkl` and `tfidf.pkl` in the project folder
+- Save `models.pkl` and `tfidf.pkl` in the project folder
 
 ### Step 5 — Run the Streamlit app
 ```bash
@@ -109,7 +109,7 @@ fake-news-detection/
 | Logistic Regression | ~98% |
 
 
-
+#SCREENSHOTS:
 
 <img width="1312" height="983" alt="Screenshot 2026-05-28 at 12 35 51 AM" src="https://github.com/user-attachments/assets/7a841e50-6aee-4c1b-8f6a-fd8bffa13876" />
 **<img width="3420" height="2050" alt="image" src="https://github.com/user-attachments/assets/19a8fe5f-ea84-4584-87ac-999daa419657" />
@@ -123,7 +123,7 @@ fake-news-detection/
 |---|---|
 | ANANT JOSHI| EN23CS301125|
 | ANAY DESAI | EN23CS301128 |
-| ANsh GUPTA | EN23CS301149 |
+| ANSH GUPTA | EN23CS301149 |
 
 **Institution:** Medi-Caps University, Indore
 **Batch:** 2023–2027
