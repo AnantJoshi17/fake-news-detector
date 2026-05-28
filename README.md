@@ -21,7 +21,7 @@ Fake news is a growing problem on the internet and social media. This project ai
 | ML Library | Scikit-learn |
 | Data Handling | Pandas, NumPy |
 | NLP | TF-IDF Vectorizer |
-| Model Saving | Joblib |
+| Model Saving | Pickle |
 | Dataset | Kaggle — Fake and Real News Dataset |
 
 ---
