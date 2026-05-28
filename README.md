@@ -31,11 +31,9 @@ Fake news is a growing problem on the internet and social media. This project ai
 - Loads and merges **44,000+ real and fake news articles** from Kaggle
 - Text **preprocessing** — lowercasing, removing punctuation and special characters
 - **TF-IDF Vectorization** — converts raw text into numerical features (5000 max features)
-- Trains and compares **4 ML models**:
+- Trains and ** model**:
   - Logistic Regression
-  - Decision Tree Classifier
-  - Random Forest Classifier
-  - Naive Bayes (Multinomial)
+  
 - Prints **accuracy, precision, recall, and F1-score** for all models
 - Automatically selects and **saves the best model** using joblib
 - **Streamlit web app** where user can paste any news article and get instant prediction
@@ -124,8 +122,8 @@ fake-news-detection/
 | Name | Roll Number |
 |---|---|
 | ANANT JOSHI| EN23CS301125|
-| ANSH DESAI | EN23CS301128 |
-| ANSH GUPTA | EN23CS301149 |
+| ANAY DESAI | EN23CS301128 |
+| ANsh GUPTA | EN23CS301149 |
 
 **Institution:** Medi-Caps University, Indore
 **Batch:** 2023–2027
