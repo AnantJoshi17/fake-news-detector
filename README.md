@@ -117,17 +117,6 @@ fake-news-detection/
 
 ---
 
-## 👥 Team Members
-
-| Name | Roll Number |
-|---|---|
-| ANANT JOSHI| EN23CS301125|
-| ANAY DESAI | EN23CS301128 |
-| ANSH GUPTA | EN23CS301149 |
-
-**Institution:** Medi-Caps University, Indore
-**Batch:** 2023–2027
-**Subject:** *(MINI PROJECT)*
 
 ---
 
