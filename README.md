@@ -10,7 +10,7 @@ LIVE DEMO : https://fake-news-detector-truthlens.streamlit.app/
 Fake news is a growing problem on the internet and social media. This project aims to solve that by building an automated system that takes a news article as input and classifies it as **REAL ✅** or **FAKE 🚨** using trained ML models. The app is deployed using **Streamlit** for an interactive and user-friendly experience.
 
 ---
-.
+
 ## 🛠️ Technology Stack and Tools Used
 
 | Category | Tools / Libraries |
