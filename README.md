@@ -11,7 +11,7 @@ Fake news is a growing problem on the internet and social media. This project ai
 
 ---
 
-## 🛠️ Technology Stack and Tools Used.
+## 🛠️ Technology Stack and Tools Used
 
 | Category | Tools / Libraries |
 |---|---|
