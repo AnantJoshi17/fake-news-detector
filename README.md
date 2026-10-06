@@ -145,4 +145,4 @@ fake-news-detector/
 
 ## 📄 License
 
-This project is for academic purposes only.
+
