@@ -1,8 +1,11 @@
 data/
-
+__pycache__/
 *.pyc
 *.pyo
 .env
 .DS_Store
 venv/
 .venv/
+
+# API keys — never commit
+.streamlit/secrets.toml

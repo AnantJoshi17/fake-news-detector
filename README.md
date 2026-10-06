@@ -1,122 +1,137 @@
-# 📰 Fake News Detection Using Machine Learning
+# 📰 TruthLens — Hybrid Fake News Detection (GenAI + ML)
 
-A machine learning web application that detects whether a news article is **Real or Fake** using Natural Language Processing (NLP) and ML classification algorithms.
+TruthLens checks news in two ways:
 
-LIVE DEMO : https://fake-news-detector-truthlens.streamlit.app/ 
----
+- **GenAI fact check:** searches the live web and has an LLM judge the claim against what it finds, with sources.
+- **ML style check:** a model trained on 44,000+ articles judges whether the writing *reads* like real or fake news.
 
-## Brief Description
-
-Fake news is a growing problem on the internet and social media. This project aims to solve that by building an automated system that takes a news article as input and classifies it as **REAL ✅** or **FAKE 🚨** using trained ML models. The app is deployed using **Streamlit** for an interactive and user-friendly experience.
+LIVE DEMO : https://fake-news-detector-truthlens.streamlit.app/
 
 ---
 
-## 🛠️ Technology Stack and Tools Used
+## 🧠 How It Works
+
+```
+User input
+   │
+   ├── Short claim (< 40 words) ─► Web search (Tavily) ─► LLM (Groq) judges using ONLY the results
+   │                               → TRUE / FALSE / UNVERIFIED / OPINION + reason + sources
+   │
+   └── Full article (40+ words) ─┬► LLM extracts up to 3 key claims ─► each checked as above
+                                 └► ML model (TF-IDF + Logistic Regression) scores writing style
+                                    → combined final verdict
+```
+
+**Final verdict for an article**
+
+| Fact check (GenAI) | Result |
+|---|---|
+| Any key claim is FALSE | **Likely Fake** |
+| All key claims are TRUE | **Likely Real** (with a note if the writing looks sensational) |
+| Claims can't be verified / API unavailable | The **ML writing-style** score decides |
+
+**Why hybrid?**
+
+- An **LLM alone** has a knowledge cutoff and can make things up. Here it never answers from memory. It only judges the search results it is given, and it cites them by number, so it cannot invent links.
+- **ML alone** only knows writing style. It cannot check facts and fails on short claims.
+- Together, GenAI checks the **facts** and ML checks the **style**. ML also keeps the app working when the APIs are down or out of free quota.
+
+---
+
+## ⚠️ Limitations
+
+- **Breaking or very local news** often comes back UNVERIFIED, because reliable sources haven't covered it yet.
+- **Opinions** ("X is the best PM") are labelled OPINION, not true or false.
+- The **ML model** was trained on 2016–17 US political news, so its style score is weaker on other topics. The app shows a warning when that happens.
+- **Always open the sources** for important news.
+
+---
+
+## 🛠️ Technology Stack
 
 | Category | Tools / Libraries |
 |---|---|
 | Language | Python 3.x |
-| IDE | Spyder (Anaconda) |
 | Frontend | Streamlit |
-| ML Library | Scikit-learn |
-| Data Handling | Pandas, NumPy |
-| NLP | TF-IDF Vectorizer |
-| Model Saving | Pickle |
-| Dataset | Kaggle — Fake and Real News Dataset |
+| LLM | Groq API (`openai/gpt-oss-120b` by default) |
+| Web search | Tavily API |
+| ML | Scikit-learn (TF-IDF + Logistic Regression) |
+| NLP | NLTK (stopwords, lemmatization) |
+| Data | Kaggle Fake and Real News (ISOT); optional WELFake |
 
 ---
 
-## ✨ Features and Functionalities Implemented
+## ✨ Features
 
-- Loads and merges **44,000+ real and fake news articles** from Kaggle
-- Text **preprocessing** — lowercasing, removing punctuation and special characters
-- **TF-IDF Vectorization** — converts raw text into numerical features (5000 max features)
-- Trains and ** model**:
-  - Logistic Regression
-  
-- Prints **accuracy, precision, recall, and F1-score** for all models
-- Automatically selects and **saves the model** using pickle
-- **Streamlit web app** where user can paste any news article and get instant prediction
-- Shows **confidence percentage** for Real vs Fake
+- **Claim check** for short statements: verdict, one-line reason and source links
+- **Article check:** extracts key claims and fact-checks each, plus writing-style analysis
+- **Explainable ML:** shows the words that pushed the score toward real or fake
+- **Leakage-free training:** strips Reuters datelines, Getty credits and tweet links; removes duplicates before the split
+- **Graceful fallback:** without API keys, or when the APIs fail, articles still get the ML result
+- **Caching:** the same claim within an hour reuses the earlier answer, which saves free API quota
 
 ---
 
-## ⚙️ Installation / Execution Steps to Run the Project
+## ⚙️ Setup
 
-### Prerequisites
-Make sure you have Python installed (Anaconda recommended).
-
-### Step 1 — Clone or download this repository
+### 1. Clone and install
 ```bash
-git clone https://github.com/yourusername/fake-news-detection.git
-cd fake-news-detection
+git clone https://github.com/AnantJoshi17/fake-news-detector.git
+cd fake-news-detector
+git lfs pull          # downloads the trained model files
+pip install -r requirements.txt
 ```
 
-### Step 2 — Install required libraries
-```bash
-pip install pandas numpy scikit-learn streamlit pickle
+### 2. Add API keys (both have free tiers)
+- Groq: https://console.groq.com/keys
+- Tavily: https://app.tavily.com
+
+Put them in `.streamlit/secrets.toml` (this file is in `.gitignore` and never pushed):
+```toml
+GROQ_API_KEY = "your-groq-key"
+TAVILY_API_KEY = "your-tavily-key"
 ```
 
-### Step 3 — Download the dataset
-- Go to: https://www.kaggle.com/datasets/clmentbisaillon/fake-and-real-news-dataset
-- Download `Fake.csv` and `True.csv`
-- Place both files in the project folder
-
-### Step 4 — Train the model (run in Spyder or terminal)
-```bash
-python model.py
-```
-This will:
-- Trains model
-- Print accuracy results
-- Save `models.pkl` and `tfidf.pkl` in the project folder
-
-### Step 5 — Run the Streamlit app
+### 3. Run
 ```bash
 streamlit run app.py
 ```
-- Browser will open automatically
-- Paste any news article in the text box
-- Click **Detect** to see the result
+
+### Deploying on Streamlit Cloud
+Open your app → **Settings → Secrets** and paste the same two lines.
+
+### Retraining the ML model (optional)
+1. Download `Fake.csv` and `True.csv` from https://www.kaggle.com/datasets/clmentbisaillon/fake-and-real-news-dataset (optionally `WELFake_Dataset.csv` from https://zenodo.org/record/4561253).
+2. Put them in `data/`.
+3. Run `python train.py`. It prints the metrics and the top words per class, then saves everything to `models/`.
 
 ---
 
 ## 📁 Project Structure
 
 ```
-fake-news-detection/
-│
-├── Fake.csv               # Fake news dataset
-├── True.csv               # Real news dataset
-├── model.py               # ML training script
-├── app.py                 # Streamlit web app
-├── best_model.pkl         # Saved best model (auto-generated)
-├── tfidf.pkl              # Saved TF-IDF vectorizer (auto-generated)
-├── README.md              # Project documentation
-├── report/
-│   └── project_report.pdf # Detailed project report
-└── screenshots/
-    ├── app_real.png        # Screenshot — real news result
-    └── app_fake.png        # Screenshot — fake news result
+fake-news-detector/
+├── app.py              # Streamlit UI: routes claims vs articles, shows results
+├── fact_checker.py     # GenAI: Tavily search + Groq LLM verdicts, final verdict rules
+├── predictor.py        # ML: loads the model, input checks, style verdict + word drivers
+├── text_utils.py       # Shared text cleaning and source-leakage stripping
+├── train.py            # ML training script
+├── requirements.txt
+├── .streamlit/
+│   └── secrets.toml    # Your API keys (not committed)
+└── models/
+    ├── model.pkl         # Logistic Regression
+    ├── vectorizer.pkl    # TF-IDF vocabulary
+    ├── domain.pkl        # Off-topic check (created by train.py)
+    └── metrics.json      # Test metrics shown in the app (created by train.py)
 ```
 
 ---
 
-## 📊 Model Accuracy Results
+## SCREENSHOTS
 
-| Model | Accuracy |
-|---|---|
-| Logistic Regression | ~98% |
-
-
-#SCREENSHOTS:
-
-<img width="1312" height="983" alt="Screenshot 2026-05-28 at 12 35 51 AM" src="https://github.com/user-attachments/assets/7a841e50-6aee-4c1b-8f6a-fd8bffa13876" />
-**<img width="3420" height="2050" alt="image" src="https://github.com/user-attachments/assets/19a8fe5f-ea84-4584-87ac-999daa419657" />
-**
-
----
-
+<img width="1312" height="983" alt="Screenshot 2026-05-28 at 12 35 51 AM" src="https://github.com/user-attachments/assets/7a841e50-6aee-4c1b-8f6a-fd8bffa13876" />
+<img width="3420" height="2050" alt="image" src="https://github.com/user-attachments/assets/19a8fe5f-ea84-4584-87ac-999daa419657" />
 
 ---
 

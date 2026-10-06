@@ -1,9 +1,9 @@
-import re
-import pickle
+from html import escape
+
 import streamlit as st
-import nltk
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
+
+from fact_checker import DEFAULT_MODEL, FactChecker, final_verdict
+from predictor import FAKE_THRESHOLD, MIN_WORDS, REAL_THRESHOLD, Predictor
 
 st.set_page_config(
     page_title="TruthLens · Fake News Detector",
@@ -258,6 +258,131 @@ textarea::placeholder { color: rgba(120,140,180,0.4) !important; }
     margin: 1rem 0;
 }
 
+.result-uncertain {
+    background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,191,36,0.03));
+    border: 1px solid rgba(251,191,36,0.3);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    margin: 1.5rem 0;
+    animation: fadeSlideUp 0.4s ease;
+}
+.result-uncertain .result-label { color: #fbbf24; }
+.result-note {
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: rgba(180,195,230,0.7);
+    margin-top: 0.75rem;
+    line-height: 1.6;
+}
+
+.info-box, .scope-box {
+    background: rgba(99,210,255,0.05);
+    border: 1px solid rgba(99,210,255,0.18);
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    font-size: 0.85rem;
+    color: rgba(200,220,250,0.8);
+    font-weight: 300;
+    line-height: 1.6;
+    margin: 1rem 0;
+}
+.scope-box { background: rgba(255,255,255,0.02); border-color: rgba(99,210,255,0.1); margin-top: 0; }
+.scope-box b, .info-box b { font-weight: 500; color: #d0daf0; }
+
+.drivers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1rem 0;
+    animation: fadeSlideUp 0.5s ease 0.15s both;
+}
+.driver-title {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(180,195,230,0.55);
+    margin-bottom: 0.5rem;
+}
+.chip {
+    display: inline-block;
+    font-size: 0.8rem;
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin: 0 6px 6px 0;
+}
+.chip-fake { color: #fca5a5; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); }
+.chip-real { color: #6ee7b7; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); }
+.chip-none { font-size: 0.8rem; color: rgba(180,195,230,0.4); }
+
+.result-opinion {
+    background: linear-gradient(135deg, rgba(167,139,250,0.08), rgba(167,139,250,0.03));
+    border: 1px solid rgba(167,139,250,0.3);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    margin: 1.5rem 0;
+    animation: fadeSlideUp 0.4s ease;
+}
+.result-opinion .result-label { color: #c4b5fd; }
+.mode-tag {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(180,195,230,0.55);
+    margin-bottom: 0.75rem;
+}
+.section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(99,210,255,0.7);
+    margin: 2rem 0 0.75rem;
+}
+.sources { margin-top: 1rem; text-align: left; }
+.sources a, .claim-row a {
+    display: block;
+    font-size: 0.82rem;
+    color: #63d2ff !important;
+    text-decoration: none;
+    margin: 0.3rem 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.sources a:hover, .claim-row a:hover { text-decoration: underline; }
+.claim-row {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(99,210,255,0.08);
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 0.75rem;
+    animation: fadeSlideUp 0.4s ease;
+}
+.claim-text { font-size: 0.9rem; color: #d0daf0; line-height: 1.5; margin: 0.4rem 0; }
+.claim-reason { font-size: 0.82rem; font-weight: 300; color: rgba(180,195,230,0.65); line-height: 1.5; }
+.pill {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 2px 10px;
+    border-radius: 100px;
+}
+.pill-TRUE { color: #34d399; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); }
+.pill-FALSE { color: #f87171; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); }
+.pill-UNVERIFIED { color: #fbbf24; background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); }
+.pill-OPINION { color: #c4b5fd; background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); }
+@media (max-width: 560px) {
+    .drivers { grid-template-columns: 1fr; }
+    .hero-stats { gap: 1.25rem; }
+}
+
 footer { display: none !important; }
 #MainMenu { display: none; }
 
@@ -270,128 +395,243 @@ footer { display: none !important; }
 
 
 @st.cache_resource
-def setup():
-    for r in ["punkt", "stopwords", "wordnet", "omw-1.4"]:
-        nltk.download(r, quiet=True)
-    with open("models/model.pkl", "rb") as f:
-        model = pickle.load(f)
-    with open("models/vectorizer.pkl", "rb") as f:
-        vectorizer = pickle.load(f)
-    lemmatizer = WordNetLemmatizer()
-    sw = set(stopwords.words("english"))
-    return model, vectorizer, lemmatizer, sw
-
-model, vectorizer, lemmatizer, stop_words = setup()
-
-def clean_text(text):
-    text = str(text).lower()
-    text = re.sub(r"http\S+|www\S+", " ", text)
-    text = re.sub(r"[^a-z0-9\s]", " ", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    tokens = [lemmatizer.lemmatize(t) for t in text.split() if t not in stop_words and len(t) > 2]
-    return " ".join(tokens)
+def load_predictor():
+    return Predictor()
 
 
-st.markdown("""
+def secret(name):
+    try:
+        return str(st.secrets.get(name, "")).strip()
+    except Exception:  # no secrets.toml at all
+        return ""
+
+
+@st.cache_resource
+def load_fact_checker():
+    groq_key, tavily_key = secret("GROQ_API_KEY"), secret("TAVILY_API_KEY")
+    if not (groq_key and tavily_key):
+        return None
+    return FactChecker(groq_key, tavily_key, model=secret("GROQ_MODEL") or DEFAULT_MODEL)
+
+
+predictor = load_predictor()
+fact_checker = load_fact_checker()
+metrics = predictor.metrics
+
+
+# Cache answers for an hour so repeated checks don't use up free API limits.
+@st.cache_data(ttl=3600, show_spinner=False)
+def check_claim(claim):
+    return fact_checker.check_claim(claim)
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def check_article(article):
+    return fact_checker.check_article(article)
+
+
+st.markdown(f"""
 <div class="hero">
-    <div class="hero-badge">AI-Powered · NLP · 99.2% Accuracy</div>
+    <div class="hero-badge">GenAI + ML · Fact Check</div>
     <h1>Truth<span>Lens</span></h1>
-    <p class="hero-sub">Paste any news article. Get an instant authenticity verdict.</p>
+    <p class="hero-sub">Type a claim or paste a full article. TruthLens checks the facts against live web sources and analyses the writing style.</p>
     <div class="hero-stats">
         <div class="stat-item">
-            <div class="stat-num">44,898</div>
+            <div class="stat-num">Live</div>
+            <div class="stat-label">Web fact check</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <div class="stat-num">{metrics['n_articles']:,}</div>
             <div class="stat-label">Articles trained</div>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
-            <div class="stat-num">99.2%</div>
-            <div class="stat-label">Accuracy</div>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-            <div class="stat-num">50K</div>
-            <div class="stat-label">TF-IDF features</div>
+            <div class="stat-num">{metrics['accuracy'] * 100:.1f}%</div>
+            <div class="stat-label">ML test accuracy</div>
         </div>
     </div>
 </div>
+<div class="scope-box">
+    <b>How it works.</b> Short claims are fact-checked by an LLM using live web search results.
+    Full articles get both: their key claims are fact-checked, and an ML model analyses the
+    writing style. Every fact check lists its sources, so open them for important news.
+</div>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="input-card"><div class="input-label">Article Text</div>', unsafe_allow_html=True)
-news_input = st.text_area("article", placeholder="Paste your news article or headline here...", height=200, label_visibility="collapsed")
+st.markdown('<div class="input-card"><div class="input-label">Claim or Article</div>', unsafe_allow_html=True)
+news_input = st.text_area(
+    "article",
+    placeholder='Type a claim (e.g. "Modi is PM of India") or paste a full news article...',
+    height=200,
+    label_visibility="collapsed",
+)
 st.markdown('</div>', unsafe_allow_html=True)
 
-THRESHOLD = 0.6
-analyse = st.button("Analyse Article →")
+analyse = st.button("Check →")
+
+VERDICT_CARDS = {   # combined / ML verdicts
+    "real": ("result-real", "✓", "Likely Real"),
+    "fake": ("result-fake", "⚠", "Likely Fake"),
+    "uncertain": ("result-uncertain", "?", "Uncertain"),
+}
+CLAIM_CARDS = {     # GenAI claim verdicts
+    "TRUE": ("result-real", "✓", "True"),
+    "FALSE": ("result-fake", "✗", "False"),
+    "UNVERIFIED": ("result-uncertain", "?", "Unverified"),
+    "OPINION": ("result-opinion", "💬", "Opinion"),
+}
+NO_KEYS = ("Fact checking needs the Groq and Tavily API keys in <b>.streamlit/secrets.toml</b> "
+           "(see the README).")
+
+
+def box(kind, html):
+    st.markdown(f'<div class="{kind}">{html}</div>', unsafe_allow_html=True)
+
+
+def card(css, icon, label, note, mode, extra=""):
+    st.markdown(
+        f'<div class="{css}"><div class="mode-tag">{mode}</div><div class="result-icon">{icon}</div>'
+        f'<div class="result-label">{label}</div><div class="result-note">{escape(note)}</div>{extra}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def source_links(sources):
+    return "".join(
+        f'<a href="{escape(s["url"], quote=True)}" target="_blank" rel="noopener">↗ {escape(s["title"])}</a>'
+        for s in sources
+    )
+
+
+def chips(drivers, kind):
+    if not drivers:
+        return '<span class="chip-none">None</span>'
+    return "".join(f'<span class="chip chip-{kind}">{escape(word)}</span>' for word, _ in drivers)
+
+
+def show_claims(claims):
+    st.markdown('<div class="section-title">Fact check of key claims · GenAI</div>', unsafe_allow_html=True)
+    for c in claims:
+        st.markdown(
+            f'<div class="claim-row"><span class="pill pill-{c["verdict"]}">{c["verdict"]}</span>'
+            f'<div class="claim-text">{escape(c["claim"])}</div>'
+            f'<div class="claim-reason">{escape(c["reason"])}</div>{source_links(c["sources"])}</div>',
+            unsafe_allow_html=True,
+        )
+
+
+def show_style(result):
+    st.markdown('<div class="section-title">Writing style · ML model</div>', unsafe_allow_html=True)
+    if result.off_topic:
+        box("warn-box", "⚠ &nbsp; This article's topic looks different from the ML training data "
+                        "(2016–17 US politics), so treat the style score with extra caution.")
+    st.markdown(
+        f'<div class="prob-section">'
+        f'<div class="prob-row"><span class="prob-tag">Real-style probability</span>'
+        f'<span class="prob-pct">{result.prob_real*100:.1f}%</span></div>'
+        f'<div class="bar-track"><div class="bar-fill-real" style="width:{result.prob_real*100:.1f}%"></div></div>'
+        f'<div class="prob-row"><span class="prob-tag">Fake-style probability</span>'
+        f'<span class="prob-pct">{result.prob_fake*100:.1f}%</span></div>'
+        f'<div class="bar-track"><div class="bar-fill-fake" style="width:{result.prob_fake*100:.1f}%"></div></div>'
+        f'</div>'
+        f'<div class="drivers">'
+        f'<div><div class="driver-title">Words pushing toward fake</div>{chips(result.fake_drivers, "fake")}</div>'
+        f'<div><div class="driver-title">Words pushing toward real</div>{chips(result.real_drivers, "real")}</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def show_how_it_works():
+    steps = [
+        f"Short claims (under {MIN_WORDS} words) are searched on the web with Tavily. An LLM on Groq "
+        "judges the claim using only those results and cites them by number, so it can't invent sources.",
+        "For full articles, the LLM first picks up to 3 key factual claims, and each is checked the same way.",
+        "An ML model (TF-IDF + Logistic Regression) scores the writing style: "
+        f"≥{FAKE_THRESHOLD:.0%} fake-style → fake, ≤{REAL_THRESHOLD:.0%} → real, otherwise uncertain.",
+        "Final verdict: a false key claim → Likely Fake; all key claims supported → Likely Real; "
+        "otherwise the writing-style score decides.",
+    ]
+    rows = "".join(
+        f'<div class="how-step"><div class="how-num">{i}</div><div class="how-text">{escape(s)}</div></div>'
+        for i, s in enumerate(steps, 1)
+    )
+    st.markdown(f'<div class="how-section"><div class="how-title">How this result was produced</div>{rows}</div>',
+                unsafe_allow_html=True)
+
+
+def run_claim_check(claim):
+    if fact_checker is None:
+        box("info-box", f"ℹ &nbsp; This looks like a short claim. {NO_KEYS} The ML model only "
+                        f"analyses full articles of {MIN_WORDS}+ words.")
+        return
+    try:
+        with st.spinner("Searching the web and checking the claim..."):
+            result = check_claim(claim)
+    except Exception:
+        box("warn-box", "⚠ &nbsp; The fact-check service is busy or unreachable right now. "
+                        "Please try again in a minute.")
+        return
+    css, icon, label = CLAIM_CARDS[result["verdict"]]
+    reason = result["reason"] or "The model did not give a reason."
+    extra = f'<div class="sources">{source_links(result["sources"])}</div>' if result["sources"] else ""
+    card(css, icon, label, reason, "Fact check · GenAI + web search", extra)
+    show_how_it_works()
+
+
+def run_article_check(article):
+    fact, fact_failed = None, False
+    with st.spinner("Checking key claims and analysing the writing style..."):
+        style = predictor.analyse(article)
+        if fact_checker is not None:
+            try:
+                fact = check_article(article)
+            except Exception:
+                fact_failed = True
+
+    style_verdict = style.verdict if style.status == "ok" else None
+    fact_verdict = fact["verdict"] if fact else None
+    if fact_verdict is None and style_verdict is None:
+        message = escape(style.message)
+        if fact_checker is None:
+            message += " " + NO_KEYS
+        box("info-box", f"ℹ &nbsp; {message}")
+        return
+
+    verdict, why = final_verdict(fact_verdict, style_verdict)
+    css, icon, label = VERDICT_CARDS[verdict]
+    mode = "Overall verdict · GenAI + ML" if fact else "Writing style · ML only"
+    card(css, icon, label, why, mode)
+
+    if fact_failed:
+        box("warn-box", "⚠ &nbsp; The fact-check service is busy or unreachable right now, "
+                        "so this result uses the writing style only.")
+    elif fact_checker is None:
+        box("info-box", f"ℹ &nbsp; {NO_KEYS} With keys added, the article's claims are fact-checked too.")
+
+    if fact and fact["claims"]:
+        show_claims(fact["claims"])
+    elif fact:
+        box("info-box", "ℹ &nbsp; No checkable factual claims were found in this article.")
+
+    if style.status == "ok":
+        show_style(style)
+    else:
+        box("info-box", f"ℹ &nbsp; Writing-style analysis skipped: {escape(style.message)}")
+    show_how_it_works()
+
 
 if analyse:
-    if not news_input.strip():
-        st.markdown('<div class="warn-box">⚠ &nbsp; Please paste some text before analysing.</div>', unsafe_allow_html=True)
-    elif len(news_input.strip().split()) < 5:
-        st.markdown('<div class="warn-box">⚠ &nbsp; Please enter at least a few words for a reliable result.</div>', unsafe_allow_html=True)
+    text = news_input.strip()
+    if not text:
+        box("warn-box", "⚠ &nbsp; Please type a claim or paste an article first.")
+    elif len(text.split()) < MIN_WORDS:
+        run_claim_check(text)
     else:
-        with st.spinner("Analysing..."):
-            cleaned = clean_text(news_input)
-            features = vectorizer.transform([cleaned])
-            probs = model.predict_proba(features)[0]
-
-        prob_fake = probs[1]
-        prob_real = probs[0]
-        prediction = 1 if prob_fake > THRESHOLD else 0
-        confidence = (prob_fake if prediction == 1 else prob_real) * 100
-
-        if prediction == 0:
-            st.markdown(f"""
-            <div class="result-real">
-                <div class="result-icon">✓</div>
-                <div class="result-label">Real News</div>
-                <div class="result-conf">{confidence:.1f}% confidence · Below fake threshold</div>
-            </div>""", unsafe_allow_html=True)
-        else:
-            st.markdown(f"""
-            <div class="result-fake">
-                <div class="result-icon">⚠</div>
-                <div class="result-label">Fake News</div>
-                <div class="result-conf">{confidence:.1f}% confidence · Exceeds fake threshold</div>
-            </div>""", unsafe_allow_html=True)
-
-        st.markdown(f"""
-        <div class="prob-section">
-            <div class="prob-row">
-                <span class="prob-tag">Real probability</span>
-                <span class="prob-pct">{prob_real*100:.1f}%</span>
-            </div>
-            <div class="bar-track"><div class="bar-fill-real" style="width:{prob_real*100:.1f}%"></div></div>
-            <div class="prob-row">
-                <span class="prob-tag">Fake probability</span>
-                <span class="prob-pct">{prob_fake*100:.1f}%</span>
-            </div>
-            <div class="bar-track"><div class="bar-fill-fake" style="width:{prob_fake*100:.1f}%"></div></div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("""
-        <div class="how-section">
-            <div class="how-title">How this result was produced</div>
-            <div class="how-step">
-                <div class="how-num">1</div>
-                <div class="how-text">Text is lowercased, URLs removed, punctuation stripped, and words lemmatized</div>
-            </div>
-            <div class="how-step">
-                <div class="how-num">2</div>
-                <div class="how-text">Converted into a 50,000-feature TF-IDF vector with unigrams + bigrams</div>
-            </div>
-            <div class="how-step">
-                <div class="how-num">3</div>
-                <div class="how-text">Logistic Regression outputs fake vs real probabilities — fake threshold is 60%</div>
-            </div>
-            <div class="how-step">
-                <div class="how-num">4</div>
-                <div class="how-text">Trained on 2016–2018 political news. Results on other domains may vary.</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        run_article_check(text)
 
 st.markdown("""
 <hr class="custom-divider">
-<div class="footer">TruthLens · Streamlit · scikit-learn · NLTK</div>
+<div class="footer">TruthLens · Streamlit · Groq · Tavily · scikit-learn · NLTK</div>
 """, unsafe_allow_html=True)
