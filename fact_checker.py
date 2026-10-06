@@ -2,6 +2,7 @@
 
 Flow for a claim:   search the web → give the results to the LLM → verdict + sources
 Flow for an article: LLM picks its key claims → check each claim as above
+Flow for a link:     download the page text (Tavily Extract) → check it as an article
 
 The LLM must judge ONLY from the search results it is given (not from memory),
 and it cites sources by number, so it cannot invent links.
@@ -93,6 +94,12 @@ class FactChecker:
         ids = sorted({int(i) for i in raw_ids if str(i).isdigit() and 1 <= int(i) <= len(evidence)})
         sources = [{"title": evidence[i - 1]["title"], "url": evidence[i - 1]["url"]} for i in ids]
         return {"verdict": verdict, "reason": str(answer.get("reason", "")).strip(), "sources": sources}
+
+    def fetch_article(self, url):
+        """Download a news page and return its main text (Tavily Extract)."""
+        response = self.web.extract(urls=[url], extract_depth="basic", format="text")
+        results = response.get("results") or []
+        return (results[0].get("raw_content") or "").strip() if results else ""
 
     def extract_claims(self, article):
         answer = self.ask_llm(EXTRACT_PROMPT.format(max_claims=MAX_CLAIMS), article[:ARTICLE_CHARS])

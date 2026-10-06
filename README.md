@@ -1,9 +1,11 @@
 # 📰 TruthLens — Hybrid Fake News Detection (GenAI + ML)
 
-TruthLens checks news in two ways:
+Type a claim, paste an article, or drop in a news link. TruthLens checks it in two ways:
 
 - **GenAI fact check:** searches the live web and has an LLM judge the claim against what it finds, with sources.
 - **ML style check:** a model trained on 44,000+ articles judges whether the writing *reads* like real or fake news.
+
+The interface is styled as a newspaper front page: a blackletter masthead, Newsreader serif type, and each verdict stamped onto the page like an inked rubber stamp.
 
 LIVE DEMO : https://fake-news-detector-truthlens.streamlit.app/
 
@@ -16,6 +18,8 @@ User input
    │
    ├── Short claim (< 40 words) ─► Web search (Tavily) ─► LLM (Groq) judges using ONLY the results
    │                               → TRUE / FALSE / UNVERIFIED / OPINION + reason + sources
+   │
+   ├── News link (https://…) ────► Tavily Extract downloads the article text ─► checked as a full article
    │
    └── Full article (40+ words) ─┬► LLM extracts up to 3 key claims ─► each checked as above
                                  └► ML model (TF-IDF + Logistic Regression) scores writing style
@@ -41,7 +45,8 @@ User input
 ## ⚠️ Limitations
 
 - **Breaking or very local news** often comes back UNVERIFIED, because reliable sources haven't covered it yet.
-- **Opinions** ("X is the best PM") are labelled OPINION, not true or false.
+- **Opinions** ("Cricket is the best sport in the world") are labelled OPINION, not true or false.
+- **Links** behind a paywall or login can't be read; paste the article text instead.
 - The **ML model** was trained on 2016–17 US political news, so its style score is weaker on other topics. The app shows a warning when that happens.
 - **Always open the sources** for important news.
 
@@ -65,6 +70,8 @@ User input
 
 - **Claim check** for short statements: verdict, one-line reason and source links
 - **Article check:** extracts key claims and fact-checks each, plus writing-style analysis
+- **Link check:** paste a news URL and the article text is downloaded and checked (paywalled pages ask you to paste the text instead)
+- **One-click examples:** a true claim, a famous myth and an opinion, to see every kind of verdict
 - **Explainable ML:** shows the words that pushed the score toward real or fake
 - **Leakage-free training:** strips Reuters datelines, Getty credits and tweet links; removes duplicates before the split
 - **Graceful fallback:** without API keys, or when the APIs fail, articles still get the ML result
@@ -118,6 +125,7 @@ fake-news-detector/
 ├── train.py            # ML training script
 ├── requirements.txt
 ├── .streamlit/
+│   ├── config.toml     # Newspaper colour theme
 │   └── secrets.toml    # Your API keys (not committed)
 └── models/
     ├── model.pkl         # Logistic Regression
